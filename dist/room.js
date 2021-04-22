@@ -19,6 +19,7 @@ class Game {
         this.empty = true;
         this.index = 0;
         this.score = [0, 0, 0, 0];
+        this.indexs = [0, 0, 0, 0];
         this.RoomID = RoomID;
         this.settings = settings;
     }
@@ -37,16 +38,24 @@ class Game {
             server_1.rooms.get(roomID).handle_disconection();
         });
         player.send("joinedRoom", { "roomID": this.RoomID, "settings": this.settings, "Nplayer": this.players.length - 1 });
-        console.log("Added Player");
+        console.log("Added Player " + (this.players.length - 1).toString());
         this.s_to_p.set(player.socket.id, player);
     }
     start() {
+        this.indexs = [0, 0, 0, 0];
         this.index = 0;
         for (let player of this.players) {
             player.send("start");
         }
         var roomID = this.RoomID;
-        this.heartbeat = setInterval(function () { server_1.rooms.get(roomID).send_data(); }, 1);
+        this.heartbeat = setInterval(function () {
+            try {
+                server_1.rooms.get(roomID).send_data();
+            }
+            catch (e) {
+                console.log("No Room");
+            }
+        }, 1);
     }
     stop(lastAlive) {
         clearInterval(this.heartbeat);
@@ -62,15 +71,17 @@ class Game {
         return;
     }
     send_data() {
-        //console.log(Math.random())
+        //console.log(this.indexs)
         let data = [];
         if (this.players.length == 0) {
+            console.log("No players, removing room");
             this.empty = true;
             this.break_room();
         }
         for (let player of this.players) {
             data.push(player.data);
             if (player.socket.disconnected) {
+                console.log("removing player" + this.players.indexOf(player));
                 this.players.splice(this.players.indexOf(player), 1);
             }
         }
@@ -84,9 +95,10 @@ class Game {
         let player = this.players[arg.playerID];
         if (player != undefined) {
             player.data = arg.data;
+            this.indexs[arg.playerID] = arg.data.index;
         }
         else {
-            console.log("NO PLAYER");
+            throw "NO PLAYER" + arg.playerID;
         }
     }
 }
