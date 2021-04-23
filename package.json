@@ -1,10 +1,11 @@
 {
-  "name": "server",
+  "name": "Tron-Multiplayer-Server",
   "version": "1.0.0",
   "description": "",
   "main": "dist/server.js",
   "scripts": {
-    "start": "tsc --watch && node dist/start.js"
+    "start": "tsc --watch && node dist/start.js",
+    "run": "node dist/start.js"
   },
   "keywords": [],
   "author": "",
